@@ -1,0 +1,68 @@
+name: Validate index
+
+# Every change to the index must pass the same rules Lithe applies to a
+# third-party source; new or changed archives are downloaded and checked.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    # Weekly re-check of every listed archive: release assets can be deleted
+    # or replaced after they were merged.
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Unit tests
+        run: node --test scripts/store.test.mjs
+
+      - name: Validate index
+        run: node scripts/validate-index.mjs lithe-plugin-index.json
+
+      - name: Pick the base index
+        id: base
+        run: |
+          case "${{ github.event_name }}" in
+            pull_request) ref="origin/${{ github.base_ref }}" ;;
+            push) ref="${{ github.event.before }}" ;;
+            *) ref="" ;;
+          esac
+          if [ -n "$ref" ] && git show "$ref:lithe-plugin-index.json" > "$RUNNER_TEMP/base-index.json" 2>/dev/null; then
+            echo "args=--base $RUNNER_TEMP/base-index.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Verify archives (checksum and plugin.json)
+        run: node scripts/validate-index.mjs lithe-plugin-index.json --verify-archives ${{ steps.base.outputs.args }}
+
+      - name: Check the schema copy matches Lithe
+        run: |
+          url="https://raw.githubusercontent.com/Lithe-IDEA/Lithe-IDEA/preview/shared/contracts/plugins/v1/plugin-index.schema.json"
+          status=$(curl -sS -o "$RUNNER_TEMP/upstream-schema.json" -w '%{http_code}' "$url")
+          if [ "$status" = "404" ]; then
+            echo "::notice::Lithe preview does not publish plugin-index.schema.json yet; skipping drift check."
+          elif [ "$status" != "200" ]; then
+            echo "::warning::Could not fetch the upstream schema (HTTP $status)."
+          elif ! diff -u "$RUNNER_TEMP/upstream-schema.json" schema/plugin-index.schema.json; then
+            echo "::error::schema/plugin-index.schema.json differs from Lithe preview. Update the copy, the fixtures in scripts/fixtures and validate-index.mjs together."
+            exit 1
+          fi

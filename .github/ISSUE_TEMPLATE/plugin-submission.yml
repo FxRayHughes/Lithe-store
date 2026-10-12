@@ -1,0 +1,53 @@
+name: 插件收录申请
+description: 申请把你的插件加入 Lithe Store（也可以直接提 PR）
+title: "[收录] "
+labels: [submission]
+body:
+  - type: input
+    id: repository
+    attributes:
+      label: 插件仓库
+      placeholder: https://github.com/<owner>/<repo>
+    validations:
+      required: true
+  - type: input
+    id: plugin-id
+    attributes:
+      label: 插件 ID（plugin.json 中的 id，不能以 dev.lithe 开头）
+    validations:
+      required: true
+  - type: input
+    id: release
+    attributes:
+      label: 首个要收录的 Release 链接
+      description: 资产命名需符合 docs/publishing.md，例如 xxx-1.0.0-darwin-arm64.zip
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 插件简介（可附中英文）
+    validations:
+      required: true
+  - type: textarea
+    id: programs
+    attributes:
+      label: 插件会运行哪些程序
+      description: 例如打包的语言服务器、依赖的系统命令（node、php…），安装时会展示给用户
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: 许可证（SPDX，如 MIT、Apache-2.0）
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认
+      options:
+        - label: 我是该插件的作者或维护者，并会通过 GitHub Releases 发布后续版本
+          required: true
+        - label: 我不会替换或删除已发布 Release 的资产
+          required: true

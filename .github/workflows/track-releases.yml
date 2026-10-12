@@ -1,0 +1,74 @@
+name: Track plugin releases
+
+# Scans the GitHub Releases of every listed plugin and opens one pull request
+# that adds versions not yet in the index. Plugin authors only need to publish
+# a release that follows docs/publishing.md.
+on:
+  schedule:
+    - cron: "41 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: "Only track this plugin ID (empty = all)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: track-releases
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BRANCH: bot/track-releases
+      # A PR opened with GITHUB_TOKEN does not trigger other workflows. Set the
+      # STORE_BOT_TOKEN secret (fine-grained PAT: contents + pull requests) so
+      # `Validate index` runs on the bot PR as well.
+      GH_TOKEN: ${{ secrets.STORE_BOT_TOKEN || github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.STORE_BOT_TOKEN || github.token }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Find new releases
+        id: track
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PLUGIN: ${{ inputs.plugin }}
+        run: |
+          cp lithe-plugin-index.json "$RUNNER_TEMP/base-index.json"
+          args=""
+          if [ -n "$PLUGIN" ]; then args="--plugin $PLUGIN"; fi
+          node scripts/track-releases.mjs lithe-plugin-index.json $args
+
+      - name: Verify the new archives
+        if: steps.track.outputs.added != '0'
+        run: node scripts/validate-index.mjs lithe-plugin-index.json --verify-archives --base "$RUNNER_TEMP/base-index.json"
+
+      - name: Open or update the pull request
+        if: steps.track.outputs.added != '0'
+        env:
+          SUMMARY: ${{ steps.track.outputs.summary }}
+        run: |
+          git config user.name "lithe-store-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          git add lithe-plugin-index.json
+          git commit -m "chore(index): track new plugin releases" -m "$SUMMARY"
+          git push --force origin "$BRANCH"
+          body=$(printf '自动追踪到新的插件版本：\n\n%s\n\n已校验 SHA-256 与包内 plugin.json（id、version、pluginAPIVersion、signatureRequirement）。维护者请按 docs/maintainers.md 的清单审查后合并。' "$(echo "$SUMMARY" | tr ',' '\n' | sed 's/^ */- /')")
+          if gh pr view "$BRANCH" --json state -q .state 2>/dev/null | grep -q OPEN; then
+            gh pr edit "$BRANCH" --body "$body"
+          else
+            gh pr create --base main --head "$BRANCH" --title "chore(index): 追踪插件新版本" --body "$body" --label new-version || \
+              gh pr create --base main --head "$BRANCH" --title "chore(index): 追踪插件新版本" --body "$body"
+          fi

@@ -1,0 +1,30 @@
+name: 报告插件问题
+description: 下载失败、校验不一致、行为可疑或冒充等收录问题
+title: "[报告] "
+labels: [report]
+body:
+  - type: input
+    id: plugin-id
+    attributes:
+      label: 插件 ID 与版本
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 问题类型
+      options:
+        - 下载失败或 SHA-256 不一致
+        - 安全问题 / 恶意行为
+        - 冒充其他项目或 Lithe 官方
+        - 信息错误
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: 详情
+      description: 插件功能本身的 bug 请提到插件自己的仓库
+    validations:
+      required: true

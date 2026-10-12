@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Lithe 本身的问题
+    url: https://github.com/Lithe-IDEA/Lithe-IDEA/issues
+    about: 插件市场界面、安装流程等 Lithe 客户端问题请提到主仓库
