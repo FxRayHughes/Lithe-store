@@ -1,4 +1,32 @@
 {
   "schemaVersion": 1,
-  "plugins": []
+  "plugins": [
+    {
+      "id": "io.github.lithe-idea.lua-support",
+      "name": "Lua Support",
+      "author": "Lithe Community",
+      "repository": "https://github.com/Lithe-IDEA/lithe-plugin-lua",
+      "homepage": "https://github.com/Lithe-IDEA/lithe-plugin-lua#readme",
+      "description": "Lua code intelligence through your installed lua-language-server, plus running the current file with lua. Requires lua and lua-language-server (brew install lua lua-language-server).",
+      "localizedDescriptions": {
+        "zh-Hans": "通过本机安装的 lua-language-server 提供 Lua 代码智能，并用 lua 运行当前文件。需要先安装 lua 和 lua-language-server（brew install lua lua-language-server）。"
+      },
+      "tags": ["language", "lua"],
+      "license": "Apache-2.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "pluginAPIVersion": 1,
+          "releaseDate": "2026-10-12",
+          "downloads": [
+            {
+              "platforms": ["darwin-arm64", "darwin-x64"],
+              "downloadURL": "https://github.com/Lithe-IDEA/lithe-plugin-lua/releases/download/v0.1.0/lua-support-0.1.0-darwin.zip",
+              "sha256": "7e496eca6f265f2bca13b1c445d30d801fb1aec1d443cc78894b7760ada18dc0"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
