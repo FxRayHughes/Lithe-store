@@ -15,4 +15,8 @@
 - 不修改已发布版本的 `downloadURL` 与 `sha256`；不删除历史版本（撤回问题版本除外）。
 - 插件的 bug 与功能请求请提到插件自己的仓库，本仓库只处理收录相关事务。
 
+第一次开发语言插件，先读[LSP 插件完整生命周期](docs/lsp-plugin-lifecycle.md)，
+再按[构建、运行与测试接入指南](docs/build-tool-integration.md)扩展能力，
+最后按[发布文档](docs/publishing.md)提交收录。
+
 审查标准见 [docs/maintainers.md](docs/maintainers.md#审查清单)。
