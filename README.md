@@ -39,6 +39,8 @@ Lithe 会把仓库地址解析为
 
 | 文档 | 内容 |
 | --- | --- |
+| [LSP 插件完整生命周期](docs/lsp-plugin-lifecycle.md) | 从 Lua 模板开始：清单、服务器打包、激活、状态目录、停止、升级与卸载 |
+| [构建、运行与测试接入](docs/build-tool-integration.md) | 可用的执行提供者示例、工程后端边界，以及开发中的 API 3 状态 |
 | [docs/publishing.md](docs/publishing.md) | 插件作者：如何打包、发布 Release、提交收录和发布新版本 |
 | [docs/versioning-and-updates.md](docs/versioning-and-updates.md) | 版本号如何追踪、Lithe 如何选择可安装版本、用户如何更新/回退 |
 | [docs/maintainers.md](docs/maintainers.md) | 维护者：审查清单、下架与撤回、同步 Lithe 契约 |
