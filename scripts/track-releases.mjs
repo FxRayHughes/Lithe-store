@@ -8,17 +8,15 @@
 //   - one `.zip` asset per platform named `<anything>-<os>-<arch>.zip`
 //     (for example `zig-support-2.0.0-darwin-arm64.zip`), or `<anything>-<os>.zip`
 //     for one archive that serves every architecture of that OS;
-//   - every archive contains the same plugin.json `version`.
+//   - every archive agrees on plugin.json `version`, `pluginAPIVersion`, and `requires`.
 //
 // Usage: node scripts/track-releases.mjs [index.json] [--plugin <id>] [--dry-run]
 // GITHUB_TOKEN is used for API requests when set.
 
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { checkManifest, formatIndex, readPackageManifests, validateIndex } from "./validate-index.mjs";
+import { checkManifest, formatIndex, readArchiveBytes, requirementsKey, validateIndex } from "./validate-index.mjs";
 
 export const KNOWN_ARCHITECTURES = { darwin: ["arm64", "x64"], windows: ["x64", "arm64"], linux: ["x64", "arm64"] };
 const ASSET_PLATFORM = /-(darwin|windows|linux)(?:-(arm64|x64))?\.zip$/;
@@ -66,12 +64,15 @@ async function download(url) {
   return Buffer.from(await response.arrayBuffer());
 }
 
-/** Builds an index version from one release, or returns problems explaining why it cannot be listed. */
-async function versionFromRelease(entry, release) {
+/** Builds a version; injected archive I/O keeps unit tests independent of network and unzip. */
+export async function versionFromRelease(entry, release, {
+  downloadArchive = download, readManifests = readArchiveBytes,
+} = {}) {
   const problems = [];
   const downloads = [];
   const versions = new Set();
   const apiVersions = new Set();
+  const capabilityRequirements = new Map();
   const claimed = new Set();
   for (const asset of release.assets ?? []) {
     const platforms = platformsForAsset(asset.name);
@@ -80,12 +81,9 @@ async function versionFromRelease(entry, release) {
       problems.push(`${asset.name}: a platform is already served by another asset`);
       continue;
     }
-    const workDir = mkdtempSync(join(tmpdir(), "lithe-track-"));
     try {
-      const bytes = await download(asset.browser_download_url);
-      const archive = join(workDir, "plugin.zip");
-      writeFileSync(archive, bytes);
-      const { manifests, unsafe } = readPackageManifests(archive, entry.id);
+      const bytes = await downloadArchive(asset.browser_download_url);
+      const { manifests, unsafe } = readManifests(bytes, entry.id);
       const assetProblems = [...unsafe.map((name) => `unsafe path ${name}`), ...checkManifest(manifests, entry)];
       if (assetProblems.length > 0) {
         problems.push(...assetProblems.map((problem) => `${asset.name}: ${problem}`));
@@ -93,6 +91,7 @@ async function versionFromRelease(entry, release) {
       }
       versions.add(manifests[0].version);
       apiVersions.add(manifests[0].pluginAPIVersion);
+      capabilityRequirements.set(requirementsKey(manifests[0].requires), manifests[0].requires);
       platforms.forEach((platform) => claimed.add(platform));
       downloads.push({
         platforms,
@@ -101,22 +100,24 @@ async function versionFromRelease(entry, release) {
       });
     } catch (error) {
       problems.push(`${asset.name}: ${error.message}`);
-    } finally {
-      rmSync(workDir, { recursive: true, force: true });
     }
   }
   if (downloads.length === 0) problems.push("no `<name>-<os>[-<arch>].zip` plugin archive in this release");
   if (versions.size > 1) problems.push(`archives disagree on plugin.json version: ${[...versions].join(", ")}`);
   if (apiVersions.size > 1) problems.push(`archives disagree on pluginAPIVersion: ${[...apiVersions].join(", ")}`);
+  if (capabilityRequirements.size > 1) problems.push("archives disagree on plugin.json requires");
   if (problems.length > 0) return { problems };
-  return {
-    version: {
-      version: [...versions][0],
-      pluginAPIVersion: [...apiVersions][0],
-      releaseDate: (release.published_at ?? release.created_at).slice(0, 10),
-      downloads: downloads.sort((left, right) => left.platforms[0].localeCompare(right.platforms[0])),
-    },
+  const requires = capabilityRequirements.values().next().value;
+  const version = {
+    version: [...versions][0],
+    pluginAPIVersion: [...apiVersions][0],
+    ...(requires === undefined ? {} : { requires: Object.fromEntries(Object.keys(requires).sort().map((id) => [id, requires[id]])) }),
+    releaseDate: (release.published_at ?? release.created_at).slice(0, 10),
+    downloads: downloads.sort((left, right) => left.platforms[0].localeCompare(right.platforms[0])),
   };
+  // Refuse an invalid release before it can affect other plugins' tracked updates.
+  const versionProblems = validateIndex({ schemaVersion: 1, plugins: [{ ...entry, versions: [version] }] });
+  return versionProblems.length > 0 ? { problems: versionProblems } : { version };
 }
 
 async function main(argv) {

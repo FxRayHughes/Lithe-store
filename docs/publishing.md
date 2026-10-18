@@ -26,6 +26,11 @@
   **不能**使用 `dev.lithe` 或 `dev.lithe.*`。
 - `vendor.signatureRequirement` 必须是 `"none"`（社区包不带 Lithe 签名）。
 - `version` 是 `MAJOR.MINOR.PATCH`，每次发布都必须递增，已发布的版本号不能复用。
+- `pluginAPIVersion: 3` 必须有非空 `requires`，逐项声明包实际使用的能力及其契约版本。
+  例如只使用声明式构建系统的包为 `"requires": { "buildSystems": 1 }`；不要无故增加
+  `buildProviders` 等能力。API 1/2 继续使用原有格式，不能带 `requires`。
+- `requires` 的键是小写字母开头、后接英文字母或数字、最长 64 个字符的能力 ID，
+  值是正整数。索引允许未知能力 ID，由宿主能力表决定可安装性；这不表示当前宿主支持它。
 - 包内路径只用 `/`，不能有 `..`、绝对路径或符号链接。
 - 可以附带可执行文件（例如打包好的语言服务器），但它们必须在 `plugin.json` 中声明；
   用户安装前会看到完整的程序列表并确认。版本更新新增了程序时，用户需要重新确认。
@@ -41,6 +46,10 @@ zig-support-2.0.0-darwin-arm64.zip
     ├── plugin.json
     └── …
 ```
+
+同一插件版本的所有平台包必须使用相同的 `version`、`pluginAPIVersion` 和 `requires`。
+能力表按键和值比较，键的书写顺序可以不同。API 3 索引版本项必须逐项复制包清单的
+`requires`；不同平台需要不同能力时，应使用不同的插件版本，不能共用一个版本项。
 
 Release 资产名必须以平台结尾，自动追踪才能识别：
 
@@ -99,6 +108,16 @@ shasum -a 256 zig-support-2.0.0-darwin-arm64.zip
 
    字段说明见 [schema/plugin-index.schema.json](../schema/plugin-index.schema.json)。`homepage`、
    `localizedDescriptions`、`tags`、`icon` 可选；`icon` 只能是同一仓库的 raw 文件。
+   API 3 的版本项还必须在 `pluginAPIVersion` 旁加入与包内相同的能力表，例如：
+
+   ```json
+   "pluginAPIVersion": 3,
+   "requires": { "buildSystems": 1 }
+   ```
+
+   提高 API 等级或能力版本时发布新的插件版本，并保留最后一个旧要求的版本项，
+   让旧宿主仍能选择可安装版本。当前 Core 对未来 API 等级（4 及以上）的索引项允许
+   省略 `requires`，提供时仍校验能力表；这只是索引格式的前向兼容，不承诺宿主可安装。
 
 2. 统一格式并本地校验（CI 要求索引使用统一格式：两格缩进，纯值列表写在一行）：
 
@@ -107,8 +126,14 @@ shasum -a 256 zig-support-2.0.0-darwin-arm64.zip
    node scripts/validate-index.mjs --verify-archives
    ```
 
-3. 提交 PR，按模板填写。CI 会下载每个新增的包，核对 SHA-256、包内 `plugin.json` 的
-   `id`、`version`、`pluginAPIVersion` 和 `signatureRequirement`。维护者审查后合并。
+3. 提交 PR，按模板填写。CI 会下载每个新增或校验预期发生变化的包，核对 SHA-256、
+   包内 `plugin.json` 的 `id`、`version`、`pluginAPIVersion`、`requires` 和
+   `signatureRequirement`。即使 URL 和 SHA-256 不变，修改 ID、版本、API 等级或能力表
+   也会重新校验；完整校验不使用基线跳过。维护者审查后合并。
+
+索引与归档检查只覆盖上述发布字段、社区信任声明和现有路径检查，不替代完整的 Core
+清单校验或插件运行验收。安装端仍由 Core 验证能力是否与清单实际内容相符，并由宿主
+检查能力支持情况。没有运行这些验证时，PR 应明确标记为待验证。
 
 也可以先开一个 [插件收录申请 issue](../../issues/new?template=plugin-submission.yml)，由维护者帮你提 PR。
 
@@ -118,15 +143,21 @@ shasum -a 256 zig-support-2.0.0-darwin-arm64.zip
 
 1. 在你的仓库递增 `plugin.json` 的 `version`，打包，发布新的正式 Release（资产命名同上）。
 2. `Track plugin releases` 工作流每 6 小时扫描一次已收录插件最近 20 个 Release，
-   把新版本写进索引（版本号、`pluginAPIVersion` 取自包内 `plugin.json`，发布日期取 Release
-   发布时间，SHA-256 由 CI 计算），然后开一个 `chore(index): 追踪插件新版本` PR。
+   把新版本写进索引（版本号、`pluginAPIVersion`、`requires` 取自包内 `plugin.json`，
+   能力表按键排序写入；发布日期取 Release 发布时间，SHA-256 由 CI 计算），
+   然后开一个 `chore(index): 追踪插件新版本` PR。
 3. 维护者审查合并后，Lithe 用户刷新插件市场就能看到更新。
 
 想更快上线，可以在 issue 里请维护者手动触发工作流，或者自己提 PR 在 `versions` 里加一项
 （保持新版本在前）。
 
-自动追踪会跳过并在日志中说明原因的情况：没有符合命名的 zip、包内 `plugin.json` 不匹配、
-多个资产声明了不同的版本号、版本号已被别的资产占用。
+自动追踪只收录正式 Release，继续跳过 draft 和 pre-release；预发布版本需要手工提交
+索引条目并接受相同的校验，不能靠调整追踪策略自动收录。Maven、Gradle 的 `0.1.0`
+预发布收录属于这种手工流程，条目是否存在不代表发布或运行验证已经完成。
+
+自动追踪会在日志中说明归档无法收录的原因：没有符合命名的 zip、包内 `plugin.json`
+不匹配或缺失/畸形的能力表、多个资产声明了不同的版本号、API 等级或能力表、
+版本号已被别的资产占用。单个发布存在分歧时拒绝整个版本，不只保留其中一个平台包。
 
 ## 5. 修改信息、转移或下架
 

@@ -56,7 +56,7 @@ jobs:
 
       - name: Check the schema copy matches Lithe
         run: |
-          url="https://raw.githubusercontent.com/Lithe-IDEA/Lithe-IDEA/preview/shared/contracts/plugins/v1/plugin-index.schema.json"
+          url="https://raw.githubusercontent.com/1lck/Lithe-IDEA/preview/shared/contracts/plugins/v1/plugin-index.schema.json"
           status=$(curl -sS -o "$RUNNER_TEMP/upstream-schema.json" -w '%{http_code}' "$url")
           if [ "$status" = "404" ]; then
             echo "::notice::Lithe preview does not publish plugin-index.schema.json yet; skipping drift check."
