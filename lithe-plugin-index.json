@@ -56,6 +56,37 @@
           ]
         }
       ]
+    },
+    {
+      "id": "io.github.lithe-idea.maven-build",
+      "name": "Maven",
+      "author": "Lithe Community",
+      "repository": "https://github.com/Lithe-IDEA/lithe-plugin-maven",
+      "homepage": "https://github.com/Lithe-IDEA/lithe-plugin-maven#readme",
+      "description": "Preview Maven integration: reactor and goal trees, profiles, filtered tests with JUnit reports, compiler diagnostics and dependency trees. Includes a read-only Maven core extension; requires a Lithe preview build with API 3 buildSystems and native build windows, Maven 3.6.3+ and Java 8+.",
+      "localizedDescriptions": {
+        "zh-Hans": "预发布 Maven 集成：反应堆与目标树、Profiles、带 JUnit 报告的筛选测试、编译诊断及依赖树。附带只读 Maven 核心扩展；需要支持 API 3 buildSystems 和原生构建窗口的 Lithe preview 开发版、Maven 3.6.3+ 与 Java 8+。"
+      },
+      "tags": ["build", "maven", "java", "testing"],
+      "license": "Apache-2.0",
+      "icon": "https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-maven/177ee4e9b12b9fe06a07498eb316539f7472d5d8/io.github.lithe-idea.maven-build/icons/maven.svg",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "pluginAPIVersion": 3,
+          "requires": {
+            "buildSystems": 1
+          },
+          "releaseDate": "2026-10-18",
+          "downloads": [
+            {
+              "platforms": ["darwin-arm64", "darwin-x64"],
+              "downloadURL": "https://github.com/Lithe-IDEA/lithe-plugin-maven/releases/download/v0.1.0/maven-build-0.1.0-darwin.zip",
+              "sha256": "4543ec130cc8c0ffc9a1c6c01b0436547b88a5273987c2c96d6ca110c1e6a655"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
