@@ -2,6 +2,37 @@
   "schemaVersion": 1,
   "plugins": [
     {
+      "id": "io.github.lithe-idea.gradle-build",
+      "name": "Gradle",
+      "author": "Lithe Community",
+      "repository": "https://github.com/Lithe-IDEA/lithe-plugin-gradle",
+      "homepage": "https://github.com/Lithe-IDEA/lithe-plugin-gradle#readme",
+      "description": "Preview Gradle integration: project and task trees, JavaExec run entries, filtered tests, compiler diagnostics and dependency trees. Requires a Lithe preview build with API 3 buildSystems and native build windows, Gradle 7.6+ and a compatible Java runtime; Gradle is not bundled.",
+      "localizedDescriptions": {
+        "zh-Hans": "预发布 Gradle 集成：项目与任务树、JavaExec 运行入口、筛选测试、编译诊断及依赖树。需要支持 API 3 buildSystems 和原生构建窗口的 Lithe preview 开发版、Gradle 7.6+ 及兼容的 Java；插件不附带 Gradle。"
+      },
+      "tags": ["build", "gradle", "java", "testing"],
+      "license": "Apache-2.0",
+      "icon": "https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-gradle/88a86cae73403d715d1385e447d8e4a9273e8f2f/io.github.lithe-idea.gradle-build/icons/gradle.svg",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "pluginAPIVersion": 3,
+          "requires": {
+            "buildSystems": 1
+          },
+          "releaseDate": "2026-10-18",
+          "downloads": [
+            {
+              "platforms": ["darwin-arm64", "darwin-x64"],
+              "downloadURL": "https://github.com/Lithe-IDEA/lithe-plugin-gradle/releases/download/v0.1.0/gradle-build-0.1.0-darwin.zip",
+              "sha256": "3c8ac1398b53df1dcb7ffd4a3e93308f39d6796f37f65b9692f4b9327c180215"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "io.github.lithe-idea.lua-support",
       "name": "Lua Support",
       "author": "Lithe Community",
