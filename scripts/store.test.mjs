@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { addVersion, platformsForAsset } from "./track-releases.mjs";
-import { formatIndex, inspectArchive, validateEntry, validateIndex } from "./validate-index.mjs";
+import { addVersion, platformsForAsset, versionFromRelease } from "./track-releases.mjs";
+import { checkManifest, formatIndex, inspectArchive, validateEntry, validateIndex, verifyArchives } from "./validate-index.mjs";
 
 // Fixtures are copied from Lithe-IDEA shared/contracts/plugins/v1/fixtures/marketplace
 // so this validator reports the same code as Lithe's Rust Core for each case.
@@ -42,6 +43,215 @@ for (const { name, edits, expectedCode } of invalidCases) {
     assert.equal(codeOf(applyEdits(validEntry(), edits)), expectedCode);
   });
 }
+
+function capabilityEntry() {
+  const entry = validEntry();
+  entry.versions = [entry.versions[1]];
+  entry.versions[0].pluginAPIVersion = 3;
+  entry.versions[0].requires = { buildSystems: 1 };
+  return entry;
+}
+
+// Manifest fragments cover publishing metadata; Core owns full declarative validation.
+function manifestFor(entry) {
+  const version = entry.versions[0];
+  return {
+    schemaVersion: 2,
+    id: entry.id,
+    version: version.version,
+    pluginAPIVersion: version.pluginAPIVersion,
+    ...(Object.hasOwn(version, "requires") ? { requires: structuredClone(version.requires) } : {}),
+    vendor: { signatureRequirement: "none" },
+  };
+}
+
+// These bytes represent manifest data only. The injected reader never invokes unzip.
+function releaseFixture(entry, manifests) {
+  const assets = manifests.map((manifest, position) => ({
+    name: `fixture-${position === 0 ? "darwin-arm64" : "windows-x64"}.zip`,
+    browser_download_url: `${entry.repository}/releases/download/v2.0.0/fixture-${position === 0 ? "darwin-arm64" : "windows-x64"}.zip`,
+    bytes: Buffer.from(JSON.stringify(manifest)),
+  }));
+  return {
+    release: { published_at: "2026-10-18T00:00:00Z", assets },
+    downloadArchive: async (url) => {
+      const asset = assets.find((candidate) => candidate.browser_download_url === url);
+      assert.ok(asset, `unexpected fixture download: ${url}`);
+      return asset.bytes;
+    },
+    readManifests: (bytes, pluginID) => {
+      assert.equal(pluginID, entry.id);
+      return { manifests: [JSON.parse(bytes.toString())], unsafe: [] };
+    },
+  };
+}
+
+test("API 3 requires a non-empty capability map and accepts future capability IDs", () => {
+  const entry = capabilityEntry();
+  assert.equal(codeOf(entry), "ok");
+  entry.versions[0].requires = { futureFeature: 99 };
+  assert.equal(codeOf(entry), "ok");
+  delete entry.versions[0].requires;
+  assert.equal(codeOf(entry), "plugin.index.invalid");
+  for (const requires of [null, {}, [], "buildSystems", { buildSystems: 0 }, { buildSystems: -1 },
+    { buildSystems: 1.5 }, { buildSystems: "1" }, { buildSystems: true }, { "build-systems": 1 },
+    { BuildSystems: 1 }, { "1buildSystems": 1 }, { ["a".repeat(65)]: 1 }]) {
+    entry.versions[0].requires = requires;
+    assert.equal(codeOf(entry), "plugin.index.invalid", JSON.stringify(requires));
+  }
+  entry.versions[0].requires = { ["a".repeat(64)]: 1 };
+  assert.equal(codeOf(entry), "ok");
+});
+
+test("API 1/2 remain valid without requires and reject it when supplied", () => {
+  for (const api of [1, 2]) {
+    const entry = validEntry();
+    entry.versions[0].pluginAPIVersion = api;
+    assert.equal(codeOf(entry), "ok");
+    for (const requires of [{ buildSystems: 1 }, null]) {
+      entry.versions[0].requires = requires;
+      assert.equal(codeOf(entry), "plugin.index.invalid");
+    }
+  }
+});
+
+test("future API levels may omit requires but validate a supplied map", () => {
+  const entry = capabilityEntry();
+  entry.versions[0].pluginAPIVersion = 4;
+  delete entry.versions[0].requires;
+  assert.equal(codeOf(entry), "ok");
+  entry.versions[0].requires = { futureFeature: 1 };
+  assert.equal(codeOf(entry), "ok");
+  entry.versions[0].requires = {};
+  assert.equal(codeOf(entry), "plugin.index.invalid");
+});
+
+test("package and index requirements agree regardless of key order", () => {
+  const entry = capabilityEntry();
+  const version = entry.versions[0];
+  version.requires = { settings: 1, buildSystems: 1 };
+  const manifest = { ...manifestFor(entry), requires: { buildSystems: 1, settings: 1 } };
+  assert.deepEqual(checkManifest([manifest], entry, version), []);
+  for (const requires of [{ buildSystems: 2, settings: 1 }, { buildSystems: 1 },
+    { buildSystems: 1, settings: 1, futureFeature: 1 }]) {
+    assert.match(checkManifest([{ ...manifest, requires }], entry, version).join(), /requires != index requires/);
+  }
+  delete manifest.requires;
+  assert.match(checkManifest([manifest], entry, version).join(), /must list its capabilities/);
+});
+
+test("package checks retain identity, API and community trust checks", () => {
+  const entry = capabilityEntry();
+  const version = entry.versions[0];
+  const manifest = manifestFor(entry);
+  for (const [edit, expected] of [
+    [{ id: "io.example.other" }, /plugin\.package\.mismatch/],
+    [{ version: "9.0.0" }, /plugin\.package\.mismatch/],
+    [{ pluginAPIVersion: 4 }, /pluginAPIVersion/],
+    [{ vendor: { signatureRequirement: "publisherPackage" } }, /signatureRequirement/],
+  ]) {
+    assert.match(checkManifest([{ ...manifest, ...edit }], entry, version).join(), expected);
+  }
+  for (const api of [1, 2]) {
+    const legacyEntry = validEntry();
+    legacyEntry.versions[0].pluginAPIVersion = api;
+    const legacyManifest = manifestFor(legacyEntry);
+    assert.deepEqual(checkManifest([legacyManifest], legacyEntry, legacyEntry.versions[0]), []);
+    assert.match(checkManifest([{ ...legacyManifest, requires: { languages: 1 } }], legacyEntry).join(), /forbidden/);
+  }
+});
+
+test("release tracking copies API 3 requires and normalizes its key order", { timeout: 5_000 }, async () => {
+  const entry = capabilityEntry();
+  const manifest = { ...manifestFor(entry), requires: { settings: 1, buildSystems: 1 } };
+  const fixture = releaseFixture(entry, [manifest, { ...manifest, requires: { buildSystems: 1, settings: 1 } }]);
+  const result = await versionFromRelease(entry, fixture.release, fixture);
+  assert.equal(result.problems, undefined);
+  assert.deepEqual(result.version.requires, { buildSystems: 1, settings: 1 });
+  assert.deepEqual(Object.keys(result.version.requires), ["buildSystems", "settings"]);
+  assert.equal(result.version.pluginAPIVersion, 3);
+  assert.equal(result.version.downloads.length, 2);
+  assert.equal(result.version.downloads[0].sha256, createHash("sha256").update(fixture.release.assets[0].bytes).digest("hex"));
+});
+
+test("release tracking rejects malformed or conflicting requirements across platforms", { timeout: 5_000 }, async () => {
+  const entry = capabilityEntry();
+  const manifest = manifestFor(entry);
+  const missing = { ...manifest };
+  delete missing.requires;
+  for (const [other, expected] of [
+    [{ ...manifest, requires: { buildSystems: 2 } }, /disagree.*requires/],
+    [{ ...manifest, requires: { buildSystems: 1, settings: 1 } }, /disagree.*requires/],
+    [{ ...manifest, requires: {} }, /non-empty/],
+    [missing, /must list its capabilities/],
+    [{ ...manifest, version: "3.0.0" }, /disagree.*version/],
+    [{ ...manifest, pluginAPIVersion: 4 }, /disagree.*pluginAPIVersion/],
+  ]) {
+    const fixture = releaseFixture(entry, [manifest, other]);
+    const result = await versionFromRelease(entry, fixture.release, fixture);
+    assert.equal(result.version, undefined);
+    assert.match(result.problems.join(), expected);
+  }
+});
+
+test("release tracking preserves API 1/2 releases without adding requires", { timeout: 5_000 }, async () => {
+  for (const api of [1, 2]) {
+    const entry = validEntry();
+    entry.versions[0].pluginAPIVersion = api;
+    const fixture = releaseFixture(entry, [manifestFor(entry)]);
+    const result = await versionFromRelease(entry, fixture.release, fixture);
+    assert.equal(result.problems, undefined);
+    assert.equal(result.version.pluginAPIVersion, api);
+    assert.equal(Object.hasOwn(result.version, "requires"), false);
+  }
+});
+
+test("archive verification rechecks changed manifest expectations for the same URL and hash", { timeout: 5_000 }, async () => {
+  const entry = capabilityEntry();
+  const manifest = manifestFor(entry);
+  const bytes = Buffer.from(JSON.stringify(manifest));
+  for (const download of entry.versions[0].downloads) download.sha256 = createHash("sha256").update(bytes).digest("hex");
+  const index = { schemaVersion: 1, plugins: [entry] };
+  let downloadCount = 0;
+  const dependencies = {
+    download: async () => { downloadCount += 1; return bytes; },
+    readManifests: () => ({ manifests: [manifest], unsafe: [] }),
+    log: () => {},
+  };
+  assert.deepEqual(await verifyArchives(index, structuredClone(index), dependencies), []);
+  assert.equal(downloadCount, 0);
+  for (const editBase of [
+    (oldEntry) => { oldEntry.versions[0].requires = { buildSystems: 2 }; },
+    (oldEntry) => { oldEntry.versions[0].pluginAPIVersion = 4; },
+    (oldEntry) => { oldEntry.versions[0].version = "1.0.0"; },
+    (oldEntry) => { oldEntry.id = "io.example.other"; },
+  ]) {
+    const base = structuredClone(index);
+    editBase(base.plugins[0]);
+    downloadCount = 0;
+    assert.deepEqual(await verifyArchives(index, base, dependencies), []);
+    assert.equal(downloadCount, entry.versions[0].downloads.length);
+  }
+  const changed = structuredClone(index);
+  changed.plugins[0].versions[0].requires = { buildSystems: 2 };
+  assert.match((await verifyArchives(changed, index, dependencies)).join(), /requires != index requires/);
+});
+
+test("archive verification compares requires by value and checks hashes before manifests", { timeout: 5_000 }, async () => {
+  const entry = capabilityEntry();
+  entry.versions[0].requires = { settings: 1, buildSystems: 1 };
+  const index = { schemaVersion: 1, plugins: [entry] };
+  const base = structuredClone(index);
+  base.plugins[0].versions[0].requires = { buildSystems: 1, settings: 1 };
+  const forbidden = () => { assert.fail("unchanged archives must not be downloaded or inspected"); };
+  assert.deepEqual(await verifyArchives(index, base, { download: forbidden, readManifests: forbidden }), []);
+  const problems = await verifyArchives(index, undefined, {
+    download: async () => Buffer.from("wrong checksum"),
+    readManifests: forbidden,
+  });
+  assert.equal(problems.length, entry.versions[0].downloads.length);
+  assert.ok(problems.every((problem) => problem.includes("plugin.archive.checksumMismatch")));
+});
 
 test("the published index is valid", () => {
   const index = JSON.parse(readFileSync(new URL("../lithe-plugin-index.json", import.meta.url)));

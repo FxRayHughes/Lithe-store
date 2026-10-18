@@ -12,8 +12,8 @@
 //   node scripts/validate-index.mjs [index.json] --verify-archives [--base <old-index.json>]
 //
 // --verify-archives downloads every archive (or, with --base, only archives
-// whose download URL is not in the base index), checks its SHA-256, and checks
-// the plugin.json inside matches the index entry and is a community package.
+// whose URL, checksum, or expected manifest metadata changed), checks its SHA-256,
+// and checks the plugin.json inside matches the index entry and is a community package.
 
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -26,7 +26,7 @@ const ENTRY_FIELDS = new Set([
   "id", "name", "author", "repository", "homepage", "description",
   "localizedDescriptions", "tags", "license", "icon", "versions",
 ]);
-const VERSION_FIELDS = new Set(["version", "pluginAPIVersion", "releaseDate", "downloads"]);
+const VERSION_FIELDS = new Set(["version", "pluginAPIVersion", "requires", "releaseDate", "downloads"]);
 const DOWNLOAD_FIELDS = new Set(["platforms", "downloadURL", "sha256"]);
 const REPOSITORY = /^https:\/\/github\.com\/([A-Za-z0-9._-]+)\/([A-Za-z0-9._-]+)\/?$/;
 const DOWNLOAD_URL = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/releases\/download\/[^/]+\/[^/]+\.zip$/;
@@ -66,6 +66,39 @@ function isCalendarDate(text) {
   if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(text)) return false;
   const date = new Date(`${text}T00:00:00Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
+}
+
+/** Validates the index-level API and capability shape, without deciding host support. */
+function validateVersionRequirements(version) {
+  if (!Number.isInteger(version.pluginAPIVersion) || version.pluginAPIVersion < 1) {
+    throw invalid("`pluginAPIVersion` must be a positive integer");
+  }
+  const present = Object.hasOwn(version, "requires");
+  if (version.pluginAPIVersion < 3 && present) {
+    throw invalid("`requires` is forbidden below pluginAPIVersion 3");
+  }
+  if (version.pluginAPIVersion === 3 && !present) {
+    throw invalid("pluginAPIVersion 3 must list its capabilities in `requires`");
+  }
+  // Core permits future API levels without requires, but validates it when supplied.
+  if (!present) return;
+  if (!isObject(version.requires) || Object.keys(version.requires).length === 0) {
+    throw invalid("`requires` must be a non-empty capability object");
+  }
+  for (const [id, capabilityVersion] of Object.entries(version.requires)) {
+    if (id.length > 64 || !/^[a-z][A-Za-z0-9]*$/.test(id)) {
+      throw invalid(`malformed capability ID \`${id}\` in requires`);
+    }
+    if (!Number.isInteger(capabilityVersion) || capabilityVersion < 1) {
+      throw invalid(`\`requires.${id}\` must be a positive integer`);
+    }
+  }
+}
+
+/** Stable equality key: capability-map property order has no contract meaning. */
+export function requirementsKey(requires) {
+  if (requires === undefined) return null;
+  return JSON.stringify(Object.keys(requires).sort().map((id) => [id, requires[id]]));
 }
 
 /** Throws IndexError when Lithe would reject this entry from a third-party source. */
@@ -130,9 +163,7 @@ export function validateEntry(entry) {
     }
     if (seenVersions.has(version.version)) throw invalid(`version ${version.version} is listed twice`);
     seenVersions.add(version.version);
-    if (!Number.isInteger(version.pluginAPIVersion) || version.pluginAPIVersion < 1) {
-      throw invalid(`${version.version}: \`pluginAPIVersion\` must be a positive integer`);
-    }
+    validateVersionRequirements(version);
     if (typeof version.releaseDate !== "string" || !isCalendarDate(version.releaseDate)) {
       throw invalid(`${version.version}: \`releaseDate\` must be a YYYY-MM-DD date`);
     }
@@ -250,11 +281,23 @@ export function checkManifest(manifests, entry, expected) {
   }
   const [manifest] = manifests;
   const problems = [];
+  if (manifest.id !== entry.id) {
+    problems.push(`plugin.package.mismatch: plugin.json id ${manifest.id} != index ${entry.id}`);
+  }
+  try {
+    validateVersionRequirements(manifest);
+  } catch (error) {
+    if (!(error instanceof IndexError)) throw error;
+    problems.push(`plugin.json: ${error.message}`);
+  }
   if (expected && manifest.version !== expected.version) {
     problems.push(`plugin.package.mismatch: plugin.json version ${manifest.version} != index ${expected.version}`);
   }
   if (expected && manifest.pluginAPIVersion !== expected.pluginAPIVersion) {
     problems.push(`plugin.json pluginAPIVersion ${manifest.pluginAPIVersion} != index ${expected.pluginAPIVersion}`);
+  }
+  if (expected && problems.length === 0 && requirementsKey(manifest.requires) !== requirementsKey(expected.requires)) {
+    problems.push("plugin.json requires != index requires");
   }
   if (manifest.vendor?.signatureRequirement !== "none") {
     problems.push('community packages must declare vendor.signatureRequirement "none"');
@@ -268,40 +311,66 @@ export function inspectArchive(archive, entry, version) {
   return [...unsafe.map((name) => `unsafe path in archive: ${name}`), ...checkManifest(manifests, entry, version)];
 }
 
-async function verifyArchives(index, baseIndex) {
+/** Reads package data without extracting or executing the archive's files. */
+export function readArchiveBytes(bytes, pluginID) {
+  const workDir = mkdtempSync(join(tmpdir(), "lithe-store-"));
+  try {
+    const archive = join(workDir, "plugin.zip");
+    writeFileSync(archive, bytes);
+    return readPackageManifests(archive, pluginID);
+  } finally {
+    rmSync(workDir, { recursive: true, force: true });
+  }
+}
+
+async function downloadArchive(url) {
+  const response = await fetch(url, { redirect: "follow", signal: AbortSignal.timeout(120_000) });
+  if (!response.ok) throw new Error(`download failed with HTTP ${response.status}`);
+  return Buffer.from(await response.arrayBuffer());
+}
+
+function archiveVerificationKey(entry, version, download) {
+  return JSON.stringify([
+    entry.id, version.version, version.pluginAPIVersion, requirementsKey(version.requires),
+    download.downloadURL, download.sha256,
+  ]);
+}
+
+/** Dependencies let tests exercise checksum and manifest checks with in-memory archives. */
+export async function verifyArchives(index, baseIndex, {
+  download = downloadArchive, readManifests = readArchiveBytes, log = console.log,
+} = {}) {
   const known = new Set();
-  for (const entry of baseIndex?.plugins ?? []) {
-    for (const version of entry.versions ?? []) {
-      for (const download of version.downloads ?? []) known.add(`${download.downloadURL}#${download.sha256}`);
+  // An invalid old index cannot establish that a package was already checked.
+  if (baseIndex && validateIndex(baseIndex).length === 0) {
+    for (const entry of baseIndex.plugins) {
+      for (const version of entry.versions) {
+        for (const download of version.downloads) known.add(archiveVerificationKey(entry, version, download));
+      }
     }
   }
   const problems = [];
   for (const entry of index.plugins) {
     for (const version of entry.versions) {
-      for (const download of version.downloads) {
-        if (known.has(`${download.downloadURL}#${download.sha256}`)) continue;
-        const label = `${entry.id}@${version.version} ${download.downloadURL}`;
-        const workDir = mkdtempSync(join(tmpdir(), "lithe-store-"));
+      for (const archiveDownload of version.downloads) {
+        if (known.has(archiveVerificationKey(entry, version, archiveDownload))) continue;
+        const label = `${entry.id}@${version.version} ${archiveDownload.downloadURL}`;
         try {
-          const response = await fetch(download.downloadURL, { redirect: "follow", signal: AbortSignal.timeout(120_000) });
-          if (!response.ok) {
-            problems.push(`${label}: download failed with HTTP ${response.status}`);
-            continue;
-          }
-          const bytes = Buffer.from(await response.arrayBuffer());
+          const bytes = await download(archiveDownload.downloadURL);
           const digest = createHash("sha256").update(bytes).digest("hex");
-          if (digest !== download.sha256) {
+          if (digest !== archiveDownload.sha256) {
             problems.push(`${label}: plugin.archive.checksumMismatch: got ${digest}`);
             continue;
           }
-          const archive = join(workDir, "plugin.zip");
-          writeFileSync(archive, bytes);
-          problems.push(...inspectArchive(archive, entry, version).map((problem) => `${label}: ${problem}`));
-          console.log(`verified ${label}`);
+          const { manifests, unsafe } = readManifests(bytes, entry.id);
+          const archiveProblems = [
+            ...unsafe.map((name) => `unsafe path in archive: ${name}`),
+            ...checkManifest(manifests, entry, version),
+          ];
+          problems.push(...archiveProblems.map((problem) => `${label}: ${problem}`));
+          if (archiveProblems.length === 0) log(`verified ${label}`);
         } catch (error) {
           problems.push(`${label}: ${error.message}`);
-        } finally {
-          rmSync(workDir, { recursive: true, force: true });
         }
       }
     }
