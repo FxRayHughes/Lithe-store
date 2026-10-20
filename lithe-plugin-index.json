@@ -2,6 +2,33 @@
   "schemaVersion": 1,
   "plugins": [
     {
+      "id": "io.github.lithe-idea.go-support",
+      "name": "Go Support",
+      "author": "Lithe Community",
+      "repository": "https://github.com/Lithe-IDEA/lithe-plugin-go",
+      "homepage": "https://github.com/Lithe-IDEA/lithe-plugin-go#readme",
+      "description": "Go code intelligence through your own gopls, plus running main packages and go test (whole module, one file's package, or a single test). Needs Go and gopls (go install golang.org/x/tools/gopls@latest).",
+      "localizedDescriptions": {
+        "zh-Hans": "使用你自己安装的 gopls 提供 Go 补全、跳转定义和错误提示，并支持运行 main 包和 go test（整个模块、单个文件所在的包或单个测试函数）。需要先安装 Go 和 gopls（go install golang.org/x/tools/gopls@latest）。"
+      },
+      "tags": ["language", "go"],
+      "license": "Apache-2.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "pluginAPIVersion": 1,
+          "releaseDate": "2026-10-20",
+          "downloads": [
+            {
+              "platforms": ["darwin-arm64", "darwin-x64"],
+              "downloadURL": "https://github.com/Lithe-IDEA/lithe-plugin-go/releases/download/v0.1.0/go-support-0.1.0-darwin.zip",
+              "sha256": "032ec66b0748fb8d68fa54063a6a735f7b4273e588eb8ecca9db42c1ed06e1df"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "io.github.lithe-idea.gradle-build",
       "name": "Gradle",
       "author": "Lithe Community",
@@ -129,6 +156,33 @@
               "platforms": ["darwin-arm64", "darwin-x64"],
               "downloadURL": "https://github.com/Lithe-IDEA/lithe-plugin-maven/releases/download/v0.1.0/maven-build-0.1.0-darwin.zip",
               "sha256": "4543ec130cc8c0ffc9a1c6c01b0436547b88a5273987c2c96d6ca110c1e6a655"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "io.github.lithe-idea.php-support",
+      "name": "PHP Support",
+      "author": "Lithe Community",
+      "repository": "https://github.com/Lithe-IDEA/lithe-plugin-php",
+      "homepage": "https://github.com/Lithe-IDEA/lithe-plugin-php#readme",
+      "description": "PHP code intelligence through your own Intelephense, plus running PHP files and PHPUnit tests. Intelephense is not bundled (its licence does not allow redistribution): install it with npm install -g intelephense. Needs Node.js; running needs php and project PHPUnit.",
+      "localizedDescriptions": {
+        "zh-Hans": "使用你自己安装的 Intelephense 提供 PHP 补全、跳转定义和错误提示，并支持运行 PHP 文件和 PHPUnit 测试。插件不内置 Intelephense（其许可证不允许再分发），请用 npm install -g intelephense 安装；需要 Node.js，运行和测试需要 php 与项目内的 PHPUnit。"
+      },
+      "tags": ["language", "php"],
+      "license": "Apache-2.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "pluginAPIVersion": 1,
+          "releaseDate": "2026-10-20",
+          "downloads": [
+            {
+              "platforms": ["darwin-arm64", "darwin-x64"],
+              "downloadURL": "https://github.com/Lithe-IDEA/lithe-plugin-php/releases/download/v0.1.0/php-support-0.1.0-darwin.zip",
+              "sha256": "a9ae2654a7a24fb897ce73f3fbe6c7269a4f23686e4a7fecae3e7997eb6e2b2d"
             }
           ]
         }
