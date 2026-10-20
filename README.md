@@ -4,7 +4,7 @@
 
 <h1>Lithe Store</h1>
 
-<p><strong><a href="https://github.com/Lithe-IDEA/Lithe-IDEA">Lithe</a> 的社区插件市场</strong></p>
+<p><strong><a href="https://github.com/1lck/Lithe-IDEA">Lithe</a> 的社区插件市场</strong></p>
 
 <p>
   <a href="#-插件总览"><b>🧩 浏览插件</b></a> ·
@@ -15,7 +15,7 @@
 
 </div>
 
-> English: Community plugin index for [Lithe](https://github.com/Lithe-IDEA/Lithe-IDEA).
+> English: Community plugin index for [Lithe](https://github.com/1lck/Lithe-IDEA).
 > Plugins live in their authors' repositories; this index pins every archive's SHA-256.
 > See [docs/publishing.md](docs/publishing.md) to list a plugin.
 

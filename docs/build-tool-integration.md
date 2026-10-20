@@ -185,4 +185,4 @@ Core 的计划接口本身不启动进程、不监视文件、不持久化选择
 
 相关入口：[生命周期教程](lsp-plugin-lifecycle.md) · [发布社区插件](publishing.md) ·
 [版本追踪](versioning-and-updates.md) ·
-[Lithe 插件契约](https://github.com/Lithe-IDEA/Lithe-IDEA/blob/preview/shared/contracts/plugins/v1/README.md)。
+[Lithe 插件契约](https://github.com/1lck/Lithe-IDEA/blob/preview/shared/contracts/plugins/v1/README.md)。
