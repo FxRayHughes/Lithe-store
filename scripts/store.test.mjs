@@ -5,6 +5,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { END, START, categoryOf, renderOverview, renderReadme, systemsOf, truncate } from "./render-readme.mjs";
 import { addVersion, platformsForAsset, versionFromRelease } from "./track-releases.mjs";
 import { checkManifest, formatIndex, inspectArchive, validateEntry, validateIndex, verifyArchives } from "./validate-index.mjs";
 
@@ -324,4 +325,34 @@ test("archives must hold one matching community plugin.json", () => {
   } finally {
     rmSync(workDir, { recursive: true, force: true });
   }
+});
+
+test("the README plugin overview matches the published index", () => {
+  const index = JSON.parse(readFileSync(new URL("../lithe-plugin-index.json", import.meta.url)));
+  const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+  assert.equal(renderReadme(readme, index), readme, "run: node scripts/render-readme.mjs");
+});
+
+test("the overview renders one escaped card per plugin with a default icon", () => {
+  const entry = validEntry();
+  delete entry.icon;
+  entry.name = "<Zig>";
+  const html = renderOverview({ schemaVersion: 1, plugins: [entry] });
+  assert.match(html, /&lt;Zig&gt;/);
+  assert.match(html, /assets\/plugin-default\.svg/);
+  assert.equal(html.match(/<td /g).length, 2, "the last row is padded to two columns");
+  assert.ok(html.startsWith(START) && html.endsWith(END));
+});
+
+test("overview helpers derive category, systems and truncated text", () => {
+  assert.equal(categoryOf({ tags: ["go", "language"] }), "语言支持");
+  assert.equal(categoryOf({ tags: ["misc"] }), "其他");
+  const version = { downloads: [{ platforms: ["windows-x64"] }, { platforms: ["darwin-arm64", "darwin-x64"] }] };
+  assert.deepEqual(systemsOf(version), ["macOS", "Windows"]);
+  assert.equal(truncate("abcdef", 3), "abc…");
+  assert.equal(truncate("abc", 3), "abc");
+});
+
+test("rendering refuses a README without the overview markers", () => {
+  assert.throws(() => renderReadme("# Lithe Store\n", { plugins: [] }), /markers/);
 });
