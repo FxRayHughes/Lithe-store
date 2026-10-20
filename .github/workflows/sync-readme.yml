@@ -1,0 +1,47 @@
+name: Sync README
+
+# Regenerates the plugin overview in README.md from lithe-plugin-index.json
+# after every change lands on main, so contributors and the release bot only
+# edit the index. Commits made with GITHUB_TOKEN do not trigger workflows,
+# so the sync commit cannot loop.
+on:
+  push:
+    branches: [main]
+    paths:
+      - lithe-plugin-index.json
+      - scripts/render-readme.mjs
+      - README.md
+      - assets/**
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-readme
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Render the plugin overview
+        run: node scripts/render-readme.mjs
+
+      - name: Commit when README changed
+        run: |
+          if git diff --quiet -- README.md; then
+            echo "README.md is already in sync."
+            exit 0
+          fi
+          git config user.name "lithe-store-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs(readme): 同步插件总览"
+          git push origin HEAD:main

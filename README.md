@@ -86,7 +86,7 @@
 ## 🤝 参与贡献
 
 想收录自己的插件、发布新版本或报告有问题的插件，请看 [CONTRIBUTING.md](CONTRIBUTING.md)。
-上方的插件总览由 `scripts/render-readme.mjs` 根据 [`lithe-plugin-index.json`](lithe-plugin-index.json) 生成，修改索引后运行一次即可。
+上方的插件总览由 `scripts/render-readme.mjs` 根据 [`lithe-plugin-index.json`](lithe-plugin-index.json) 生成，索引合并到 main 后由 CI 自动同步。
 
 ## 📄 许可
 

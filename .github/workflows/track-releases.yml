@@ -49,7 +49,6 @@ jobs:
           args=""
           if [ -n "$PLUGIN" ]; then args="--plugin $PLUGIN"; fi
           node scripts/track-releases.mjs lithe-plugin-index.json $args
-          node scripts/render-readme.mjs
 
       - name: Verify the new archives
         if: steps.track.outputs.added != '0'
@@ -63,7 +62,7 @@ jobs:
           git config user.name "lithe-store-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -C "$BRANCH"
-          git add lithe-plugin-index.json README.md
+          git add lithe-plugin-index.json
           git commit -m "chore(index): track new plugin releases" -m "$SUMMARY"
           git push --force origin "$BRANCH"
           body=$(printf '自动追踪到新的插件版本：\n\n%s\n\n已校验 SHA-256 与包内 plugin.json（id、version、pluginAPIVersion、signatureRequirement）。维护者请按 docs/maintainers.md 的清单审查后合并。' "$(echo "$SUMMARY" | tr ',' '\n' | sed 's/^ */- /')")
