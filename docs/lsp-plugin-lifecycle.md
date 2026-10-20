@@ -251,7 +251,7 @@ API 1 的 Lua 模板通过启动器设置缓存目录，并使用 `exec` 将启�
 
 API 2 也支持 `initializationOptions` 和声明式 `settings`。只传上游真实支持的选项；
 `${setting:<id>}` 只能引用已声明设置，值必须符合类型和范围。设置是插件级、跨工作区共享，
-修改后宿主重启相应服务器。详细格式见[正式契约](https://github.com/Lithe-IDEA/Lithe-IDEA/blob/preview/shared/contracts/plugins/v1/README.md#plugin-settings-api-2)。
+修改后宿主重启相应服务器。详细格式见[正式契约](https://github.com/1lck/Lithe-IDEA/blob/preview/shared/contracts/plugins/v1/README.md#plugin-settings-api-2)。
 
 ## 6. 本地验证、安装与激活
 
@@ -380,6 +380,6 @@ print(greet("Lithe"))
 | 能补全但无法构建/测试 | 是否实际声明并验证了独立的运行/测试或构建集成 |
 
 字段全集、API 等级和稳定错误码以 Lithe 的
-[插件契约](https://github.com/Lithe-IDEA/Lithe-IDEA/blob/preview/shared/contracts/plugins/v1/README.md)及
-[清单 Schema](https://github.com/Lithe-IDEA/Lithe-IDEA/blob/preview/shared/contracts/plugins/v1/plugin-manifest.schema.json)为准。
+[插件契约](https://github.com/1lck/Lithe-IDEA/blob/preview/shared/contracts/plugins/v1/README.md)及
+[清单 Schema](https://github.com/1lck/Lithe-IDEA/blob/preview/shared/contracts/plugins/v1/plugin-manifest.schema.json)为准。
 跟随 preview 阅读时要区分已发布能力与开发中的契约，发布前以目标宿主实际支持为准。

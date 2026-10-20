@@ -19,7 +19,7 @@
 ## 1. 插件包要求
 
 插件包遵守 Lithe 插件契约 v1
-（[`shared/contracts/plugins/v1/README.md`](https://github.com/Lithe-IDEA/Lithe-IDEA/blob/preview/shared/contracts/plugins/v1/README.md)）。
+（[`shared/contracts/plugins/v1/README.md`](https://github.com/1lck/Lithe-IDEA/blob/preview/shared/contracts/plugins/v1/README.md)）。
 社区插件额外要求：
 
 - `plugin.json` 的 `id` 使用你自己的反向域名，例如 `io.github.<你的用户名>.zig-support`；

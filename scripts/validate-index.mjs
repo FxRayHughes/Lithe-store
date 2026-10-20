@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Validates lithe-plugin-index.json against the Lithe plugin contract v1
-// (https://github.com/Lithe-IDEA/Lithe-IDEA/tree/preview/shared/contracts/plugins/v1).
+// (https://github.com/1lck/Lithe-IDEA/tree/preview/shared/contracts/plugins/v1).
 //
 // Lithe's Rust Core (`plugins.marketplace.validateIndex`) is the source of truth
 // and silently drops invalid entries. This store is stricter: any entry that
