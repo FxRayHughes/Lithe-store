@@ -2,6 +2,7 @@
 // Renders the plugin overview in README.md from lithe-plugin-index.json, so the
 // cards always match what Lithe shows in its marketplace. Only the block between
 // the `plugins:start` / `plugins:end` markers is generated; edit the rest by hand.
+// The `Sync README` workflow runs this after every change on main.
 //
 // Usage: node scripts/render-readme.mjs [--check]
 //   --check  exit 1 when README.md is out of date instead of rewriting it.

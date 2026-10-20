@@ -4,7 +4,7 @@
 | --- | --- |
 | 收录自己的插件 | 读 [docs/publishing.md](docs/publishing.md)，提 PR 或开“插件收录申请” issue |
 | 发布插件新版本 | 在自己仓库发布 Release 即可，bot 会自动开 PR（见 [发布新版本](docs/publishing.md#4-发布新版本)） |
-| 修改插件信息 | 提 PR 修改 `lithe-plugin-index.json` 中自己的条目，并运行 `node scripts/render-readme.mjs` 更新 README |
+| 修改插件信息 | 提 PR 修改 `lithe-plugin-index.json` 中自己的条目（含 `icon`） |
 | 报告有问题的插件 | 开“报告插件问题” issue；安全问题请勾选“安全问题”，维护者会优先处理 |
 | 改进脚本、CI 或文档 | 直接提 PR，并运行 `node --test scripts/store.test.mjs` |
 
@@ -13,7 +13,8 @@
 - 一个 PR 只改一个插件，便于审查和回退。
 - `plugins` 按 `id` 字母序排列；每个插件的 `versions` 新版本在前。
 - 不修改已发布版本的 `downloadURL` 与 `sha256`；不删除历史版本（撤回问题版本除外）。
-- 修改索引后运行 `node scripts/render-readme.mjs`，README 的插件总览由它生成，CI 会检查两者是否一致。
+- README 的插件总览由 `scripts/render-readme.mjs` 根据索引生成，合并到 main 后由 `Sync README` 工作流自动提交，PR 中不需要手动更新。
+- 插件图标填在条目的 `icon` 字段，指向插件仓库内固定到提交的 SVG/PNG（`raw.githubusercontent.com/<owner>/<repo>/<commit>/…`）；没有填写时 README 使用默认图标。
 - 插件的 bug 与功能请求请提到插件自己的仓库，本仓库只处理收录相关事务。
 
 第一次开发语言插件，先读[LSP 插件完整生命周期](docs/lsp-plugin-lifecycle.md)，
@@ -63,7 +64,7 @@ scripts/track-releases.mjs      # 追踪已收录插件的新 Release 并生成�
 scripts/render-readme.mjs       # 根据索引生成 README 的插件总览
 scripts/store.test.mjs          # 校验脚本的测试（fixtures 复制自 Lithe 主仓库）
 assets/                         # README 用到的图片（无图标插件的默认图标）
-.github/workflows/              # validate（PR/推送/每周）与 track-releases（每 6 小时）
+.github/workflows/              # validate（PR/推送/每周）、track-releases（每 6 小时）、sync-readme（main 更新后同步 README）
 ```
 
 ## 本地校验
@@ -73,5 +74,5 @@ assets/                         # README 用到的图片（无图标插件的默
 ```bash
 node --test scripts/store.test.mjs
 node scripts/validate-index.mjs --verify-archives
-node scripts/render-readme.mjs --check
+node scripts/render-readme.mjs   # 本地预览 README 插件总览
 ```

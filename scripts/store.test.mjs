@@ -327,11 +327,6 @@ test("archives must hold one matching community plugin.json", () => {
   }
 });
 
-test("the README plugin overview matches the published index", () => {
-  const index = JSON.parse(readFileSync(new URL("../lithe-plugin-index.json", import.meta.url)));
-  const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
-  assert.equal(renderReadme(readme, index), readme, "run: node scripts/render-readme.mjs");
-});
 
 test("the overview renders one escaped card per plugin with a default icon", () => {
   const entry = validEntry();
