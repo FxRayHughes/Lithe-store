@@ -13,6 +13,7 @@
       },
       "tags": ["language", "go"],
       "license": "Apache-2.0",
+      "icon": "https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-go/14321930779d1b441e1b7d13d2a4a741ef8f305c/io.github.lithe-idea.go-support/icons/go.svg",
       "versions": [
         {
           "version": "0.1.0",
@@ -86,6 +87,7 @@
       },
       "tags": ["language", "lua"],
       "license": "Apache-2.0",
+      "icon": "https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-lua/c5f88bf94e9d5616c7770e58febc53a0d520dd50/io.github.lithe-idea.lua-support/icons/lua.svg",
       "versions": [
         {
           "version": "0.3.0",
@@ -173,6 +175,7 @@
       },
       "tags": ["language", "php"],
       "license": "Apache-2.0",
+      "icon": "https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-php/a0b5600d2629e7acc72dda5871dbe403ce1922a9/io.github.lithe-idea.php-support/icons/php.svg",
       "versions": [
         {
           "version": "0.1.0",

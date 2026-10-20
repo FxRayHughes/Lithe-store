@@ -31,7 +31,7 @@
 <table>
 <tr>
 <td width="50%" valign="top">
-<h3><img src="assets/plugin-default.svg" width="28" height="28" alt=""> <a href="https://github.com/Lithe-IDEA/lithe-plugin-go">Go Support</a></h3>
+<h3><img src="https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-go/14321930779d1b441e1b7d13d2a4a741ef8f305c/io.github.lithe-idea.go-support/icons/go.svg" width="28" height="28" alt=""> <a href="https://github.com/Lithe-IDEA/lithe-plugin-go">Go Support</a></h3>
 <p><sub>Lithe Community · v0.1.0 · API 1</sub></p>
 <p>使用你自己安装的 gopls 提供 Go 补全、跳转定义和错误提示，并支持运行 main 包和 go test（整个模块、单个文件所在的包或单个测试函数）。需要先安装 Go 和 gopls（go install gola…</p>
 <p>🏷️ 语言支持 · 💻 macOS · <img src="https://img.shields.io/github/stars/Lithe-IDEA/lithe-plugin-go?style=flat&label=stars&logo=github" alt="GitHub stars"></p>
@@ -47,7 +47,7 @@
 </tr>
 <tr>
 <td width="50%" valign="top">
-<h3><img src="assets/plugin-default.svg" width="28" height="28" alt=""> <a href="https://github.com/Lithe-IDEA/lithe-plugin-lua">Lua Support</a></h3>
+<h3><img src="https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-lua/c5f88bf94e9d5616c7770e58febc53a0d520dd50/io.github.lithe-idea.lua-support/icons/lua.svg" width="28" height="28" alt=""> <a href="https://github.com/Lithe-IDEA/lithe-plugin-lua">Lua Support</a></h3>
 <p><sub>Lithe Community · v0.3.0 · API 1</sub></p>
 <p>内置 lua-language-server（LuaLS）提供 Lua 补全、跳转定义和错误提示，无需另外安装；“运行当前文件”使用你自己的 lua（brew install lua）。</p>
 <p>🏷️ 语言支持 · 💻 macOS · <img src="https://img.shields.io/github/stars/Lithe-IDEA/lithe-plugin-lua?style=flat&label=stars&logo=github" alt="GitHub stars"></p>
@@ -63,7 +63,7 @@
 </tr>
 <tr>
 <td width="50%" valign="top">
-<h3><img src="assets/plugin-default.svg" width="28" height="28" alt=""> <a href="https://github.com/Lithe-IDEA/lithe-plugin-php">PHP Support</a></h3>
+<h3><img src="https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-php/a0b5600d2629e7acc72dda5871dbe403ce1922a9/io.github.lithe-idea.php-support/icons/php.svg" width="28" height="28" alt=""> <a href="https://github.com/Lithe-IDEA/lithe-plugin-php">PHP Support</a></h3>
 <p><sub>Lithe Community · v0.1.0 · API 1</sub></p>
 <p>使用你自己安装的 Intelephense 提供 PHP 补全、跳转定义和错误提示，并支持运行 PHP 文件和 PHPUnit 测试。插件不内置 Intelephense（其许可证不允许再分发），请用 npm insta…</p>
 <p>🏷️ 语言支持 · 💻 macOS · <img src="https://img.shields.io/github/stars/Lithe-IDEA/lithe-plugin-php?style=flat&label=stars&logo=github" alt="GitHub stars"></p>
