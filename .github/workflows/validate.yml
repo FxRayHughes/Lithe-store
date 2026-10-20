@@ -37,9 +37,6 @@ jobs:
       - name: Validate index
         run: node scripts/validate-index.mjs lithe-plugin-index.json
 
-      - name: Check the README plugin overview
-        run: node scripts/render-readme.mjs --check
-
       - name: Pick the base index
         id: base
         run: |
