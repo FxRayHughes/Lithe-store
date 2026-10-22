@@ -2,6 +2,38 @@
   "schemaVersion": 1,
   "plugins": [
     {
+      "id": "io.github.lithe-idea.cargo-build",
+      "name": "Cargo",
+      "author": "Lithe Community",
+      "repository": "https://github.com/Lithe-IDEA/lithe-plugin-cargo",
+      "homepage": "https://github.com/Lithe-IDEA/lithe-plugin-cargo#readme",
+      "description": "Preview Cargo build integration: native workspace/package build, check and test, clean, binary/example runs, Release, Features and Offline. Requires a Lithe preview with API 3 buildSystems/buildProviders/serverProcess, Cargo 1.70+ and Node.js 20.3+. Native installation/UI acceptance is pending; macOS only.",
+      "localizedDescriptions": {
+        "zh-Hans": "Cargo 构建预发布插件：原生 workspace/包编译、检查、测试、清理及 binary/example 运行，支持 Release、Features 和 Offline。需要支持 API 3 buildSystems/buildProviders/serverProcess 的 Lithe preview、Cargo 1.70+ 和 Node.js 20.3+；原生安装与界面验收待完成，仅支持 macOS。"
+      },
+      "tags": ["build", "cargo", "rust", "testing"],
+      "license": "Apache-2.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "pluginAPIVersion": 3,
+          "requires": {
+            "buildProviders": 1,
+            "buildSystems": 1,
+            "serverProcess": 1
+          },
+          "releaseDate": "2026-10-22",
+          "downloads": [
+            {
+              "platforms": ["darwin-arm64", "darwin-x64"],
+              "downloadURL": "https://github.com/Lithe-IDEA/lithe-plugin-cargo/releases/download/v0.1.0/cargo-build-0.1.0-darwin.zip",
+              "sha256": "a6148b3fe931e0b8d51f3a305592d4827ba5b452ec905f921560bb84a3f949a5"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "io.github.lithe-idea.go-support",
       "name": "Go Support",
       "author": "Lithe Community",
