@@ -32,8 +32,8 @@
 <tr>
 <td width="50%" valign="top">
 <h3><img src="assets/plugin-default.svg" width="28" height="28" alt=""> <a href="https://github.com/Lithe-IDEA/lithe-plugin-cargo">Cargo</a></h3>
-<p><sub>Lithe Community · v0.1.0 · API 3（需 buildProviders、buildSystems、serverProcess）</sub></p>
-<p>Cargo 构建预发布插件：原生 workspace/包编译、检查、测试、清理及 binary/example 运行，支持 Release、Features 和 Offline。需要支持 API 3 buildSyste…</p>
+<p><sub>Lithe Community · v0.1.1 · API 3（需 buildProviders、buildSystems、serverProcess、settings）</sub></p>
+<p>Cargo 构建预发布插件：原生 workspace/包编译、检查、测试、清理及 binary/example 运行，支持 Release、Features 和 Offline。0.1.1 新增 Cargo 可执行文件路…</p>
 <p>🏷️ 构建工具 · 💻 macOS · <img src="https://img.shields.io/github/stars/Lithe-IDEA/lithe-plugin-cargo?style=flat&label=stars&logo=github" alt="GitHub stars"></p>
 <p><code>build</code> <code>cargo</code> <code>rust</code> <code>testing</code></p>
 </td>
