@@ -9,6 +9,7 @@
 <p>
   <a href="#-插件总览"><b>🧩 浏览插件</b></a> ·
   <a href="#️-在-lithe-中安装"><b>⬇️ 安装方式</b></a> ·
+  <a href="https://github.com/Lithe-IDEA/lithe-plugin-docs"><b>📚 开发插件</b></a> ·
   <a href="docs/publishing.md"><b>📤 发布插件</b></a> ·
   <a href="CONTRIBUTING.md"><b>🤝 参与贡献</b></a>
 </p>
@@ -91,7 +92,7 @@
 
 ## 🤝 参与贡献
 
-想收录自己的插件、发布新版本或报告有问题的插件，请看 [CONTRIBUTING.md](CONTRIBUTING.md)。
+想写插件，先看 [lithe-plugin-docs](https://github.com/Lithe-IDEA/lithe-plugin-docs)。想收录自己的插件、发布新版本或报告有问题的插件，请看 [CONTRIBUTING.md](CONTRIBUTING.md)。
 上方的插件总览由 `scripts/render-readme.mjs` 根据 [`lithe-plugin-index.json`](lithe-plugin-index.json) 生成，索引合并到 main 后由 CI 自动同步。
 
 ## 📄 许可

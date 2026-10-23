@@ -2,9 +2,10 @@
 
 这份文档面向插件作者：从打包到被 Lithe 用户看到的完整流程。
 
-还没有可安装的插件包时，先跟着[LSP 插件完整生命周期教程](lsp-plugin-lifecycle.md)
+还没有可安装的插件包时，先跟着 lithe-plugin-docs 的
+[LSP 插件完整生命周期教程](https://github.com/Lithe-IDEA/lithe-plugin-docs/blob/main/guides/lsp-plugin-lifecycle.md)
 完成清单、语言服务器构建和运行验收；需要接入命令、测试或构建后端时，阅读
-[构建、运行与测试接入指南](build-tool-integration.md)。
+[构建、运行与测试接入指南](https://github.com/Lithe-IDEA/lithe-plugin-docs/blob/main/guides/build-tool-integration.md)。
 
 ```text
 你的插件仓库                          Lithe-store                      Lithe 用户
@@ -106,7 +107,7 @@ shasum -a 256 zig-support-2.0.0-darwin-arm64.zip
    }
    ```
 
-   字段说明见 [schema/plugin-index.schema.json](../schema/plugin-index.schema.json)。`homepage`、
+   字段说明见 [plugin-index.schema.json](https://github.com/Lithe-IDEA/lithe-plugin-docs/blob/main/contract/v1/plugin-index.schema.json)。`homepage`、
    `localizedDescriptions`、`tags`、`icon` 可选；`icon` 只能是同一仓库的 raw 文件。
    API 3 的版本项还必须在 `pluginAPIVersion` 旁加入与包内相同的能力表，例如：
 
