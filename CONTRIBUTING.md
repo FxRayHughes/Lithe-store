@@ -17,9 +17,8 @@
 - 插件图标填在条目的 `icon` 字段，指向插件仓库内固定到提交的 SVG/PNG（`raw.githubusercontent.com/<owner>/<repo>/<commit>/…`）；没有填写时 README 使用默认图标。
 - 插件的 bug 与功能请求请提到插件自己的仓库，本仓库只处理收录相关事务。
 
-第一次开发语言插件，先读[LSP 插件完整生命周期](docs/lsp-plugin-lifecycle.md)，
-再按[构建、运行与测试接入指南](docs/build-tool-integration.md)扩展能力，
-最后按[发布文档](docs/publishing.md)提交收录。
+怎么写插件（开发指南、LSP 与构建工具教程、插件契约和 SDK）见
+[lithe-plugin-docs](https://github.com/Lithe-IDEA/lithe-plugin-docs)；写好以后按[发布文档](docs/publishing.md)提交收录。
 
 审查标准见 [docs/maintainers.md](docs/maintainers.md#审查清单)。
 
@@ -48,21 +47,19 @@ Lithe 会把仓库地址 `https://github.com/Lithe-IDEA/Lithe-store` 解析为
 
 | 文档 | 内容 |
 | --- | --- |
-| [LSP 插件完整生命周期](docs/lsp-plugin-lifecycle.md) | 从 Lua 模板开始：清单、服务器打包、激活、状态目录、停止、升级与卸载 |
-| [构建、运行与测试接入](docs/build-tool-integration.md) | 可用的执行提供者示例、工程后端边界，以及开发中的 API 3 状态 |
+| [lithe-plugin-docs](https://github.com/Lithe-IDEA/lithe-plugin-docs) | 插件开发：开发指南、LSP 与构建工具教程、插件契约与 JSON Schema、SDK 下载 |
 | [docs/publishing.md](docs/publishing.md) | 插件作者：如何打包、发布 Release、提交收录和发布新版本 |
 | [docs/versioning-and-updates.md](docs/versioning-and-updates.md) | 版本号如何追踪、Lithe 如何选择可安装版本、用户如何更新/回退 |
-| [docs/maintainers.md](docs/maintainers.md) | 维护者：审查清单、下架与撤回、同步 Lithe 契约 |
+| [docs/maintainers.md](docs/maintainers.md) | 维护者：审查清单、下架与撤回、跟进插件契约变化 |
 
 ## 仓库结构
 
 ```text
 lithe-plugin-index.json         # 唯一的数据文件，Lithe 客户端读取它
-schema/plugin-index.schema.json # 索引 JSON Schema（Lithe 契约 v1 的副本）
 scripts/validate-index.mjs      # 与 Lithe Rust Core 同规则的校验 + 下载包校验
 scripts/track-releases.mjs      # 追踪已收录插件的新 Release 并生成版本条目
 scripts/render-readme.mjs       # 根据索引生成 README 的插件总览
-scripts/store.test.mjs          # 校验脚本的测试（fixtures 复制自 Lithe 主仓库）
+scripts/store.test.mjs          # 校验脚本的测试（fixtures 复制自插件契约）
 assets/                         # README 用到的图片（无图标插件的默认图标）
 .github/workflows/              # validate（PR/推送/每周）、track-releases（每 6 小时）、sync-readme（main 更新后同步 README）
 ```

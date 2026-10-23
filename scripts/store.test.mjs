@@ -9,7 +9,7 @@ import { END, START, categoryOf, renderOverview, renderReadme, systemsOf, trunca
 import { addVersion, platformsForAsset, versionFromRelease } from "./track-releases.mjs";
 import { checkManifest, formatIndex, inspectArchive, validateEntry, validateIndex, verifyArchives } from "./validate-index.mjs";
 
-// Fixtures are copied from Lithe-IDEA shared/contracts/plugins/v1/fixtures/marketplace
+// Fixtures are copied from the plugin contract (lithe-plugin-docs contract/v1/fixtures/marketplace)
 // so this validator reports the same code as Lithe's Rust Core for each case.
 const fixtureIndex = JSON.parse(readFileSync(new URL("./fixtures/index.json", import.meta.url)));
 const invalidCases = JSON.parse(readFileSync(new URL("./fixtures/invalid-index-entries.json", import.meta.url))).cases;

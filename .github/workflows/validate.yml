@@ -54,15 +54,23 @@ jobs:
       - name: Verify archives (checksum and plugin.json)
         run: node scripts/validate-index.mjs lithe-plugin-index.json --verify-archives ${{ steps.base.outputs.args }}
 
-      - name: Check the schema copy matches Lithe
+      - name: Check the index contract has not changed
+        # validate-index.mjs follows the index rules of the Lithe plugin
+        # contract, published in lithe-plugin-docs. A different schema there
+        # means the rules changed; see docs/maintainers.md.
+        env:
+          SCHEMA_URL: https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-docs/main/contract/v1/plugin-index.schema.json
+          SCHEMA_SHA256: 6771cb0e8c1ba101e6fc90b436de1b74f057ff0d58cc90f92e669edc9a102fc6
         run: |
-          url="https://raw.githubusercontent.com/1lck/Lithe-IDEA/preview/shared/contracts/plugins/v1/plugin-index.schema.json"
-          status=$(curl -sS -o "$RUNNER_TEMP/upstream-schema.json" -w '%{http_code}' "$url")
+          status=$(curl -sS -o "$RUNNER_TEMP/plugin-index.schema.json" -w '%{http_code}' "$SCHEMA_URL")
           if [ "$status" = "404" ]; then
-            echo "::notice::Lithe preview does not publish plugin-index.schema.json yet; skipping drift check."
+            echo "::notice::lithe-plugin-docs does not publish plugin-index.schema.json yet; skipping contract check."
           elif [ "$status" != "200" ]; then
-            echo "::warning::Could not fetch the upstream schema (HTTP $status)."
-          elif ! diff -u "$RUNNER_TEMP/upstream-schema.json" schema/plugin-index.schema.json; then
-            echo "::error::schema/plugin-index.schema.json differs from Lithe preview. Update the copy, the fixtures in scripts/fixtures and validate-index.mjs together."
-            exit 1
+            echo "::warning::Could not fetch the published schema (HTTP $status)."
+          else
+            actual=$(sha256sum "$RUNNER_TEMP/plugin-index.schema.json" | cut -d' ' -f1)
+            if [ "$actual" != "$SCHEMA_SHA256" ]; then
+              echo "::error::The published plugin-index.schema.json changed (SHA-256 $actual). Update validate-index.mjs, scripts/fixtures and SCHEMA_SHA256 together; see docs/maintainers.md."
+              exit 1
+            fi
           fi

@@ -47,18 +47,20 @@ CI（`Validate index`）已经自动保证：
 不要为了“修正”而修改已发布版本的 `downloadURL` 或 `sha256`：Lithe 以它们确认包的身份，
 修改等于换包，只能通过新版本发布。
 
-## 同步 Lithe 契约
+## 跟进插件契约变化
 
-`schema/plugin-index.schema.json`、`scripts/fixtures/` 是 Lithe 主仓库
-`shared/contracts/plugins/v1/` 的副本，`scripts/validate-index.mjs` 实现与
-`rust/lithe-core/src/plugins/marketplace.rs` 相同的条目规则（本仓库更严格：Lithe
-会忽略的无效条目在这里直接让 CI 失败）。
+`scripts/validate-index.mjs` 实现与 Lithe Core（`rust/lithe-core/src/plugins/marketplace.rs`）
+相同的索引条目规则（本仓库更严格：Lithe 会忽略的无效条目在这里直接让 CI 失败）；
+`scripts/fixtures/` 复制自插件契约的 `fixtures/marketplace/`。插件契约的公开副本在
+[lithe-plugin-docs](https://github.com/Lithe-IDEA/lithe-plugin-docs) 的 `contract/v1/`，本仓库不再保存 Schema 副本。
 
-`Validate index` 会比较 schema 副本与 Lithe `preview` 分支；不一致时 CI 失败。此时：
+`Validate index` 会检查 lithe-plugin-docs 上 `plugin-index.schema.json` 的 SHA-256 是否等于
+工作流里记录的值；不一致说明索引契约变了，CI 失败。此时：
 
-1. 复制新的 `plugin-index.schema.json` 与 `fixtures/marketplace/{index,invalid-index-entries}.json`；
-2. 按 Lithe 的 README 更新 `validate-index.mjs`；
-3. 运行 `node --test scripts/store.test.mjs`，所有 fixture 用例必须通过。
+1. 对照 lithe-plugin-docs 的提交记录查看 Schema 和契约 README 改了什么；
+2. 复制新的 `fixtures/marketplace/{index,invalid-index-entries}.json`，按契约 README 更新 `validate-index.mjs`；
+3. 运行 `node --test scripts/store.test.mjs`，所有 fixture 用例必须通过；
+4. 把 `.github/workflows/validate.yml` 里的 `SCHEMA_SHA256` 换成新 Schema 的 SHA-256。
 
 如果契约升级到新的 `schemaVersion`，旧版 Lithe 会拒绝整个索引，需要先与主仓库商定迁移方案
 （例如并行发布新文件名），不要直接改 `lithe-plugin-index.json` 的 `schemaVersion`。
