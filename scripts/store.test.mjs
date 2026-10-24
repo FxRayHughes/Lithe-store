@@ -341,6 +341,7 @@ test("the overview renders one escaped card per plugin with a default icon", () 
 
 test("overview helpers derive category, systems and truncated text", () => {
   assert.equal(categoryOf({ tags: ["go", "language"] }), "语言支持");
+  assert.equal(categoryOf({ tags: ["vcs", "svn"] }), "版本控制");
   assert.equal(categoryOf({ tags: ["misc"] }), "其他");
   const version = { downloads: [{ platforms: ["windows-x64"] }, { platforms: ["darwin-arm64", "darwin-x64"] }] };
   assert.deepEqual(systemsOf(version), ["macOS", "Windows"]);
