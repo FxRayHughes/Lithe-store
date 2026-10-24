@@ -66,6 +66,23 @@
       "license": "Apache-2.0",
       "versions": [
         {
+          "version": "0.1.1",
+          "pluginAPIVersion": 3,
+          "requires": {
+            "backend": 1,
+            "serverProcess": 1,
+            "ui": 2
+          },
+          "releaseDate": "2026-10-24",
+          "downloads": [
+            {
+              "platforms": ["darwin-arm64", "darwin-x64"],
+              "downloadURL": "https://github.com/Lithe-IDEA/lithe-plugin-database/releases/download/v0.1.1/database-0.1.1-darwin.zip",
+              "sha256": "8882e0e2f5106286ea16e89f0c21e7d73de9765306966d63b4580e5286d33005"
+            }
+          ]
+        },
+        {
           "version": "0.1.0",
           "pluginAPIVersion": 3,
           "requires": {
