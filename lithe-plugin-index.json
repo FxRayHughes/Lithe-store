@@ -271,6 +271,7 @@
       },
       "tags": ["vcs", "svn", "subversion"],
       "license": "Apache-2.0",
+      "icon": "https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-svn/717d23cd417f796d8487b3b7cbc8150a8356b512/assets/subversion.svg",
       "versions": [
         {
           "version": "0.1.0",
