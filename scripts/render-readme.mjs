@@ -20,6 +20,7 @@ const DESCRIPTION_LIMIT = 110;
 const CATEGORIES = [
   ["language", "语言支持"],
   ["build", "构建工具"],
+  ["vcs", "版本控制"],
   ["theme", "主题"],
   ["tool", "工具"],
 ];
