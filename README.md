@@ -80,7 +80,7 @@
 </tr>
 <tr>
 <td width="50%" valign="top">
-<h3><img src="assets/plugin-default.svg" width="28" height="28" alt=""> <a href="https://github.com/Lithe-IDEA/lithe-plugin-svn">Subversion</a></h3>
+<h3><img src="https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-svn/717d23cd417f796d8487b3b7cbc8150a8356b512/assets/subversion.svg" width="28" height="28" alt=""> <a href="https://github.com/Lithe-IDEA/lithe-plugin-svn">Subversion</a></h3>
 <p><sub>Lithe Community · v0.1.0 · API 3（需 serverProcess、vcsProviders）</sub></p>
 <p>Subversion 预发布插件：在版本控制工具窗口查看 SVN 工作副本的变更，支持提交、更新、回滚、解决冲突、清理、历史、Annotate 和与基线比较；项目树移动通过 svn move 记录。需要支持 API 3…</p>
 <p>🏷️ 版本控制 · 💻 macOS · <img src="https://img.shields.io/github/stars/Lithe-IDEA/lithe-plugin-svn?style=flat&label=stars&logo=github" alt="GitHub stars"></p>
