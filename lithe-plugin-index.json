@@ -13,6 +13,7 @@
       },
       "tags": ["build", "cargo", "rust", "testing"],
       "license": "Apache-2.0",
+      "icon": "https://raw.githubusercontent.com/Lithe-IDEA/lithe-plugin-cargo/8fea6ad38995ce31d657da371420df6b8e8c0e7d/io.github.lithe-idea.cargo-build/icons/cargo.svg",
       "versions": [
         {
           "version": "0.1.1",
