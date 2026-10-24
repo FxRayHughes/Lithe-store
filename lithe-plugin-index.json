@@ -58,13 +58,30 @@
       "author": "Lithe Community",
       "repository": "https://github.com/Lithe-IDEA/lithe-plugin-database",
       "homepage": "https://github.com/Lithe-IDEA/lithe-plugin-database#readme",
-      "description": "Database tool window: connections to MySQL, MariaDB, PostgreSQL, SQLite, SQL Server, MongoDB, Redis and Nacos, with a SQL console, table data and structure editing, CSV/JSON/SQL import and export, SQL history, read-only and production protection, and DBX connection import. Replaces Lithe's former built-in database module, whose saved connections and passwords move in on first start. Requires a Lithe preview with backend 1 and web bridge 2; native UI acceptance is pending; macOS only.",
+      "description": "Database tool window: connections to MySQL, MariaDB, PostgreSQL, SQLite, SQL Server, MongoDB, Redis and Nacos, with a SQL console, table data and structure editing, CSV/JSON/SQL import and export, SQL history, read-only and production protection, and DBX connection import. Replaces Lithe's former built-in database module, whose saved connections and passwords move in on first start. Requires a Lithe preview with backend 1 and web bridge 2; macOS only.",
       "localizedDescriptions": {
-        "zh-Hans": "数据库工具窗口：连接 MySQL、MariaDB、PostgreSQL、SQLite、SQL Server、MongoDB、Redis 和 Nacos，提供 SQL 控制台、表数据与结构编辑、CSV/JSON/SQL 导入导出、SQL 历史、只读与生产保护，以及 DBX 连接导入。取代 Lithe 以前内置的数据库模块，首次启动时自动迁入已保存的连接和密码。需要支持 backend 1 和网页桥接第 2 版的 Lithe preview；原生界面验收待完成，仅支持 macOS。"
+        "zh-Hans": "数据库工具窗口：连接 MySQL、MariaDB、PostgreSQL、SQLite、SQL Server、MongoDB、Redis 和 Nacos，提供 SQL 控制台、表数据与结构编辑、CSV/JSON/SQL 导入导出、SQL 历史、只读与生产保护，以及 DBX 连接导入。取代 Lithe 以前内置的数据库模块，首次启动时自动迁入已保存的连接和密码。需要支持 backend 1 和网页桥接第 2 版的 Lithe preview；仅支持 macOS。"
       },
       "tags": ["tool", "database", "sql", "mysql", "postgresql", "redis"],
       "license": "Apache-2.0",
       "versions": [
+        {
+          "version": "0.1.1",
+          "pluginAPIVersion": 3,
+          "requires": {
+            "backend": 1,
+            "serverProcess": 1,
+            "ui": 2
+          },
+          "releaseDate": "2026-10-24",
+          "downloads": [
+            {
+              "platforms": ["darwin-arm64", "darwin-x64"],
+              "downloadURL": "https://github.com/Lithe-IDEA/lithe-plugin-database/releases/download/v0.1.1/database-0.1.1-darwin.zip",
+              "sha256": "8882e0e2f5106286ea16e89f0c21e7d73de9765306966d63b4580e5286d33005"
+            }
+          ]
+        },
         {
           "version": "0.1.0",
           "pluginAPIVersion": 3,
