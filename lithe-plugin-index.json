@@ -257,6 +257,37 @@
           ]
         }
       ]
+    },
+    {
+      "id": "io.github.lithe-idea.svn-support",
+      "name": "Subversion",
+      "author": "Lithe Community",
+      "repository": "https://github.com/Lithe-IDEA/lithe-plugin-svn",
+      "homepage": "https://github.com/Lithe-IDEA/lithe-plugin-svn#readme",
+      "description": "Preview Subversion integration: shows SVN working copy changes in a version control tool window, with check-in, update, rollback, conflict resolution, cleanup, history, annotate and base diff; project tree moves go through svn move. Requires a Lithe preview build with API 3 vcsProviders 1 and serverProcess 1, Subversion 1.8+ and Node.js 20.3+. Full native UI acceptance is pending; macOS only.",
+      "localizedDescriptions": {
+        "zh-Hans": "Subversion 预发布插件：在版本控制工具窗口查看 SVN 工作副本的变更，支持提交、更新、回滚、解决冲突、清理、历史、Annotate 和与基线比较；项目树移动通过 svn move 记录。需要支持 API 3 vcsProviders 1 与 serverProcess 1 的 Lithe preview 开发版、Subversion 1.8+ 和 Node.js 20.3+。完整原生界面验收待完成，仅支持 macOS。"
+      },
+      "tags": ["vcs", "svn", "subversion"],
+      "license": "Apache-2.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "pluginAPIVersion": 3,
+          "requires": {
+            "serverProcess": 1,
+            "vcsProviders": 1
+          },
+          "releaseDate": "2026-10-24",
+          "downloads": [
+            {
+              "platforms": ["darwin-arm64", "darwin-x64"],
+              "downloadURL": "https://github.com/Lithe-IDEA/lithe-plugin-svn/releases/download/v0.1.0/svn-support-0.1.0-darwin.zip",
+              "sha256": "23fb009cf9fc51f1093a77809f1865b52a781565bbde0c49a1ed890a3b0c46fc"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
