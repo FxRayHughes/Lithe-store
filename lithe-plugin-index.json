@@ -2,6 +2,37 @@
   "schemaVersion": 1,
   "plugins": [
     {
+      "id": "io.github.fxrayhughes.mise",
+      "name": "mise",
+      "author": "FxRayHughes",
+      "repository": "https://github.com/FxRayHughes/lithe-plugin-mise",
+      "homepage": "https://github.com/FxRayHughes/lithe-plugin-mise#readme",
+      "description": "Finds the JDK, Node.js, Maven, Gradle, Go, Python and pnpm that mise installed, and uses the versions a project's mise.toml or .tool-versions requests, with no paths to add by hand. Lithe only reads mise's install directories and version files; it never runs mise. Requires a Lithe build with the toolchainSources capability; macOS only.",
+      "localizedDescriptions": {
+        "zh-Hans": "自动找到 mise 安装的 JDK、Node.js、Maven、Gradle、Go、Python 和 pnpm，并按项目的 mise.toml 或 .tool-versions 选择版本，无需手动添加路径。Lithe 只读取 mise 的安装目录和版本文件，不运行 mise。需要支持 toolchainSources 能力的 Lithe，仅支持 macOS。"
+      },
+      "tags": ["tool", "toolchain", "mise", "java", "node"],
+      "license": "Apache-2.0",
+      "icon": "https://raw.githubusercontent.com/FxRayHughes/lithe-plugin-mise/75423c2cedd15d8f8c7e266ffc866a28c7572316/io.github.fxrayhughes.mise/icons/mise.svg",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "pluginAPIVersion": 3,
+          "requires": {
+            "toolchainSources": 1
+          },
+          "releaseDate": "2026-10-29",
+          "downloads": [
+            {
+              "platforms": ["darwin-arm64", "darwin-x64"],
+              "downloadURL": "https://github.com/FxRayHughes/lithe-plugin-mise/releases/download/v0.1.0/mise-0.1.0-darwin.zip",
+              "sha256": "e8020787ee45264159c0026717b694d6b64976a5afc951eba20e153128527a1e"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "io.github.lithe-idea.cargo-build",
       "name": "Cargo",
       "author": "Lithe Community",
